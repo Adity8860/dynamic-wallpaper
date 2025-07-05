@@ -3,18 +3,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/context/authContext.js";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+
   const [error, setError] = useState("");
   const router = useRouter();
+  const { login, isLoading } = useAuth();
 
   async function handleLogin(e) {
     e.preventDefault();
-    setIsLoading(true);
+    if (isLoading) return; // Prevent multiple
     setError("");
 
     try {
@@ -30,7 +32,7 @@ export default function LoginPage() {
 
       if (res.ok) {
         // Note: In a real app, consider using httpOnly cookies instead of localStorage
-        localStorage.setItem("token", data.token);
+        login(data.token);
         router.push("/");
       } else {
         setError(data.message || "Login failed. Please try again.");
@@ -38,7 +40,7 @@ export default function LoginPage() {
     } catch (err) {
       setError("Network error. Please check your connection.");
     } finally {
-      setIsLoading(false);
+      if (isLoading) return; // Prevent multiple
     }
   }
 

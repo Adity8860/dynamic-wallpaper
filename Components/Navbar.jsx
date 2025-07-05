@@ -3,15 +3,18 @@
 import Link from "next/link";
 import { Button } from "@/Components/ui/button.jsx";
 import { Menu, X, Search } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+// import { handleLogout } from "@/lib/utils";
+import { useAuth } from "@/context/authContext.js";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // const [isLoggedIn, setIsLoggedIn] = useState(false); 
+
   const [query, setQuery] = useState("");
   const router = useRouter();
-
+  const { isLoggedIn,login, logout, isLoading } = useAuth();
+  if (isLoading) return null; // or a spinner or placeholder
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -21,6 +24,7 @@ export default function Navbar() {
       router.push(`/search?q=${query}`);
     }
   };
+
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,16 +65,22 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:block">
-            <div className="ml-4 flex items-center space-x-3">
-              <Button variant="ghost" asChild>
-                <Link href="/login">Login</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup">Sign Up</Link>
-              </Button>
+          {isLoggedIn ? (
+             <Button onClick={logout} variant="default">
+              Sign out
+            </Button>
+          ) : (
+           <div className="hidden md:block">
+              <div className="ml-4 flex items-center space-x-3">
+                <Button  variant="ghost" asChild>
+                  <Link href="/login">Login</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/signup">Sign Up</Link>
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Mobile menu button */}
           <div className="md:hidden">
@@ -118,7 +128,7 @@ export default function Navbar() {
                       Login
                     </Link>
                   </Button>
-                  
+
                   <Button className="justify-start" asChild>
                     <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
                       Sign Up
