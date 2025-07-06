@@ -3,14 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/Components/ui/button.jsx";
 import { Input } from "@/Components/ui/input.jsx";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from "@/Components/ui/dropdown-menu.jsx";
+
 import {
   Avatar,
   AvatarFallback,
@@ -197,8 +190,8 @@ export default function Navbar() {
               <div className="space-y-2">
                 <Button
                   onClick={logout}
-                  variant="ghost"
-                  className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                  variant="default"
+                  
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out

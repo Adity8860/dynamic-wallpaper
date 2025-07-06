@@ -1,60 +1,69 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Download, Heart, Eye, MessageCircle, X, ExternalLink } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
+import { useState } from "react";
+import {
+  Download,
+  Heart,
+  Eye,
+  MessageCircle,
+  X,
+  ExternalLink,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { useAuth } from "@/context/authContext";
 
 export default function ImageGrid({ images }) {
-  const [loadedImages, setLoadedImages] = useState(new Set())
-  const [errorImages, setErrorImages] = useState(new Set())
-  const [selectedImage, setSelectedImage] = useState(null)
-  const [downloading, setDownloading] = useState(false)
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  const [errorImages, setErrorImages] = useState(new Set());
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+  const { isLoggedIn } = useAuth();
 
   const handleImageLoad = (imageId) => {
-    setLoadedImages((prev) => new Set([...prev, imageId]))
-  }
+    setLoadedImages((prev) => new Set([...prev, imageId]));
+  };
 
   const handleImageError = (imageId, url) => {
-    console.error(`Failed to load image ${imageId}: ${url}`)
-    setErrorImages((prev) => new Set([...prev, imageId]))
-  }
+    console.error(`Failed to load image ${imageId}: ${url}`);
+    setErrorImages((prev) => new Set([...prev, imageId]));
+  };
 
   const openModal = (image) => {
-    setSelectedImage(image)
-  }
+    setSelectedImage(image);
+  };
 
   const closeModal = () => {
-    setSelectedImage(null)
-  }
+    setSelectedImage(null);
+  };
 
   const downloadImage = async (image) => {
-    setDownloading(true)
+    setDownloading(true);
     try {
-      const imageUrl = image.largeImageURL || image.webformatURL
-      const response = await fetch(imageUrl)
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `image-${image.id}.jpg`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      const imageUrl = image.largeImageURL || image.webformatURL;
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `image-${image.id}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Download failed:", error)
+      console.error("Download failed:", error);
     } finally {
-      setDownloading(false)
+      setDownloading(false);
     }
-  }
+  };
 
   const formatNumber = (num) => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M"
-    if (num >= 1000) return (num / 1000).toFixed(1) + "K"
-    return num?.toString() || "0"
-  }
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+    return num?.toString() || "0";
+  };
 
   return (
     <>
@@ -72,7 +81,11 @@ export default function ImageGrid({ images }) {
                 )}
 
                 <Image
-                  src={errorImages.has(img.id) ? "/placeholder.svg?height=400&width=300" : img.webformatURL}
+                  src={
+                    errorImages.has(img.id)
+                      ? "/placeholder.svg?height=400&width=300"
+                      : img.webformatURL
+                  }
                   alt={img.tags}
                   width={300}
                   height={400}
@@ -109,7 +122,9 @@ export default function ImageGrid({ images }) {
 
               <div className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-sm line-clamp-1">{img.tags.split(",").slice(0, 2).join(", ")}</h3>
+                  <h3 className="font-semibold text-sm line-clamp-1">
+                    {img.tags.split(",").slice(0, 2).join(", ")}
+                  </h3>
                   <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                     {img.user || "Unknown"}
                   </span>
@@ -131,18 +146,33 @@ export default function ImageGrid({ images }) {
                     </span>
                   </div>
 
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      downloadImage(img)
-                    }}
-                    disabled={downloading}
-                  >
-                    {downloading ? "..." : "Download"}
-                  </Button>
+                  {isLoggedIn ? (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        downloadImage(img);
+                      }}
+                      disabled={downloading}
+                    >
+                      {downloading ? "..." : "Download"}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        downloadImage(img);
+                      }}
+                      disabled={downloading}
+                    >
+                      {downloading ? "..." : "Download"}
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -167,14 +197,19 @@ export default function ImageGrid({ images }) {
                   {selectedImage.user && (
                     <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
                       <img
-                        src={selectedImage.userImageURL || "/placeholder.svg?height=24&width=24"}
+                        src={
+                          selectedImage.userImageURL ||
+                          "/placeholder.svg?height=24&width=24"
+                        }
                         alt={selectedImage.user}
                         className="w-5 h-5 rounded-full"
                         onError={(e) => {
-                          e.target.src = "/placeholder.svg?height=24&width=24"
+                          e.target.src = "/placeholder.svg?height=24&width=24";
                         }}
                       />
-                      <span className="text-white text-sm font-medium">{selectedImage.user}</span>
+                      <span className="text-white text-sm font-medium">
+                        {selectedImage.user}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -211,7 +246,10 @@ export default function ImageGrid({ images }) {
                 alt={selectedImage.tags}
                 className="w-full h-auto max-h-[70vh] object-contain bg-gray-100"
                 onError={() =>
-                  handleImageError(selectedImage.id, selectedImage.largeImageURL || selectedImage.webformatURL)
+                  handleImageError(
+                    selectedImage.id,
+                    selectedImage.largeImageURL || selectedImage.webformatURL
+                  )
                 }
               />
             </div>
@@ -243,7 +281,9 @@ export default function ImageGrid({ images }) {
                     <Eye className="w-4 h-4" />
                     <span className="text-sm font-medium">Views</span>
                   </div>
-                  <span className="text-2xl font-bold text-gray-800">{formatNumber(selectedImage.views)}</span>
+                  <span className="text-2xl font-bold text-gray-800">
+                    {formatNumber(selectedImage.views)}
+                  </span>
                 </div>
                 {/* <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                   <div className="flex items-center gap-2 text-red-500 mb-1">
@@ -264,13 +304,16 @@ export default function ImageGrid({ images }) {
                     <Download className="w-4 h-4" />
                     <span className="text-sm font-medium">Downloads</span>
                   </div>
-                  <span className="text-2xl font-bold text-gray-800">{formatNumber(selectedImage.downloads)}</span>
+                  <span className="text-2xl font-bold text-gray-800">
+                    {formatNumber(selectedImage.downloads)}
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-500">
-                  Image ID: {selectedImage.id} • Size: {selectedImage.imageWidth}×{selectedImage.imageHeight}
+                  Image ID: {selectedImage.id} • Size:{" "}
+                  {selectedImage.imageWidth}×{selectedImage.imageHeight}
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -308,5 +351,5 @@ export default function ImageGrid({ images }) {
         </div>
       )}
     </>
-  )
+  );
 }

@@ -12,6 +12,7 @@ import {
   List,
   ArrowUp,
 } from "lucide-react";
+import { useAuth } from "@/context/authContext";
 
 const PIXABAY_API_KEY = "50781656-478fec576b87761cff94f809e";
 const PIXABAY_BASE_URL = "https://pixabay.com/api/";
@@ -27,6 +28,7 @@ export default function CollectionPage() {
   const [sortBy, setSortBy] = useState("popular");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [hoveredImage, setHoveredImage] = useState(null);
+  const{isLoggedIn} = useAuth()
 
   const searchQuery = decodeURIComponent(collection || "")
     .replace(/\+/g, " ")
@@ -132,7 +134,7 @@ export default function CollectionPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 mt-4">
           {/* Header Skeleton */}
           <div className="text-center mb-12">
             <div className="h-12 w-64 bg-gray-200 rounded-xl mx-auto mb-4 animate-pulse"></div>
@@ -193,10 +195,10 @@ export default function CollectionPage() {
         {/* Enhanced Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
               <ImageIcon className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent capitalize">
+            <h1 className="text-4xl md:text-5xl font-bold bg-black bg-clip-text text-transparent capitalize">
               {searchQuery} Collection
             </h1>
           </div>
@@ -351,22 +353,41 @@ export default function CollectionPage() {
                       <Heart className="w-3 h-3" />
                       <span>{formatNumber(img.likes)}</span>
                     </div> */}
-                    <button
-                      onClick={() =>
-                        downloadImage(
-                          img.largeImageURL,
-                          `${searchQuery}-${img.id}.jpg`,
-                          img.id
-                        )
-                      }
-                      disabled={downloadingIds.has(img.id)}
-                      className="bg-gray-500 hover:bg-gray-600 disabled:bg-blue-400 text-white px-6 py-2 rounded-xl font-sm transition-colors duration-200 flex items-center gap-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      {downloadingIds.has(img.id)
-                        ? "Downloading..."
-                        : "Download "}
-                    </button>
+                    {isLoggedIn ? (
+                      <button
+                        onClick={() =>
+                          downloadImage(
+                            img.largeImageURL,
+                            `${searchQuery}-${img.id}.jpg`,
+                            img.id
+                          )
+                        }
+                        disabled={downloadingIds.has(img.id)}
+                        className="bg-gray-500 hover:bg-gray-600 disabled:bg-blue-400 text-white px-6 py-2 rounded-xl font-sm transition-colors duration-200 flex items-center gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        {downloadingIds.has(img.id)
+                          ? "Downloading..."
+                          : "Download "}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() =>
+                          downloadImage(
+                            img.largeImageURL,
+                            `${searchQuery}-${img.id}.jpg`,
+                            img.id
+                          )
+                        }
+                        disabled={downloadingIds.has(img.id)}
+                        className="bg-gray-500 hover:bg-gray-600 disabled:bg-blue-400 text-white px-6 py-2 rounded-xl font-sm transition-colors duration-200   items-center gap-2 hidden"
+                      >
+                        <Download className="w-4 h-4" />
+                        {downloadingIds.has(img.id)
+                          ? "Downloading..."
+                          : "Download "}
+                      </button>
+                    )}
                   </div>
 
                   {/* <div className="flex items-center gap-2">
@@ -389,7 +410,7 @@ export default function CollectionPage() {
         {showScrollTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 w-12 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center z-50"
+            className="fixed bottom-8 right-8 w-12 h-12 bg-black text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center z-50"
           >
             <ArrowUp className="w-5 h-5" />
           </button>
