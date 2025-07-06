@@ -2,143 +2,324 @@
 
 import Link from "next/link";
 import { Button } from "@/Components/ui/button.jsx";
-import { Menu, X, Search } from "lucide-react";
+import { Input } from "@/Components/ui/input.jsx";
+
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/Components/ui/avatar.jsx";
+import { Badge } from "@/Components/ui/badge.jsx";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+} from "@/Components/ui/sheet.jsx";
+import { Separator } from "@/Components/ui/separator.jsx";
+import {
+  Menu,
+  Search,
+  Sparkles,
+  User,
+  LogOut,
+  Settings,
+  Heart,
+  Download,
+  Bell,
+  ChevronDown,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-// import { handleLogout } from "@/lib/utils";
 import { useAuth } from "@/context/authContext.js";
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const [isScrolled, setIsScrolled] = useState(false);
   const [query, setQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const router = useRouter();
-  const { isLoggedIn,login, logout, isLoading } = useAuth();
-  if (isLoading) return null; // or a spinner or placeholder
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const { isLoggedIn, login, logout, isLoading, user } = useAuth();
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  if (isLoading) return null;
+
   const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      router.push(`/search?q=${query}`);
+      router.push(`/search?q=${encodeURIComponent(query)}`);
     }
   };
 
+  const UserAvatar = ({ className = "" }) => (
+    <Avatar className={`h-8 w-8 ${className}`}>
+      <AvatarImage src={user?.avatar} alt={user?.name} />
+      <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+        {user?.name?.charAt(0) || "U"}
+      </AvatarFallback>
+    </Avatar>
+  );
+
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled
+          ? "bg-background/95 backdrop-blur-xl border-b shadow-lg"
+          : "bg-background/80 backdrop-blur-md border-b border-border/50"
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">L</span>
+            <Link href="/" className="flex items-center group">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                <div className="relative inline-flex items-center justify-center w-10 h-10 bg-primary rounded-2xl shadow-lg group-hover:scale-105 group-hover:shadow-xl group-hover:shadow-primary/25 transition-all duration-300">
+                  <Sparkles className="h-5 w-5 text-primary-foreground" />
+                </div>
               </div>
-              <span className="ml-2 text-xl font-bold text-gray-900">Logo</span>
+              <span className="ml-3 text-2xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors duration-300">
+                D-wally
+              </span>
+              <Badge variant="secondary" className="ml-2 text-xs">
+                Beta
+              </Badge>
             </Link>
           </div>
 
-          {/* Search Field */}
-          <div className="hidden md:block flex-1 max-w-lg mx-8">
-            <form onSubmit={handleSearch} className="flex">
-              {" "}
-              <div className="flex">
-                <div className="relative flex-1">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
-                  </div>
-
-                  <input
-                    type="text"
-                    value={query}
-                    placeholder="Search..."
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-l-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          {/* Enhanced Search Field */}
+          <div className="hidden md:block flex-1 max-w-2xl mx-8">
+            <form onSubmit={handleSearch} className="relative">
+              <div
+                className={`relative flex items-center transition-all duration-300 ${
+                  isSearchFocused ? "ring-2 ring-primary/20" : ""
+                }`}
+              >
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search
+                    className={`h-4 w-4 transition-colors duration-300 ${
+                      isSearchFocused ? "text-primary" : "text-muted-foreground"
+                    }`}
                   />
                 </div>
-                <Button type="submit" className="rounded-l-none">
+                <Input
+                  type="text"
+                  value={query}
+                  placeholder="Search wallpapers, collections, themes..."
+                  onChange={(e) => setQuery(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                  className="pl-10 pr-24 h-10 bg-background/50 border-border/50 rounded-full focus:bg-background transition-all duration-300"
+                />
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="absolute right-1 rounded-full px-4 h-8 shadow-md hover:shadow-lg transition-all duration-300"
+                >
                   Search
                 </Button>
               </div>
             </form>
           </div>
 
-          {/* Desktop Auth Buttons */}
-          {isLoggedIn ? (
-             <Button onClick={logout} variant="default">
-              Sign out
-            </Button>
-          ) : (
-           <div className="hidden md:block">
-              <div className="ml-4 flex items-center space-x-3">
-                <Button  variant="ghost" asChild>
+          {/* Desktop Auth Section */}
+          <div className="hidden md:flex items-center space-x-3">
+            {isLoggedIn ? (
+              // <div className="flex items-center space-x-2">
+              //   {/* Notifications */}
+              //   <Button variant="ghost" size="icon" className="relative">
+              //     <Bell className="h-4 w-4" />
+              //     <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-destructive hover:bg-destructive/90">
+              //       3
+              //     </Badge>
+              //   </Button>
+
+              //   {/* User Dropdown */}
+              //   <DropdownMenu>
+              //     <DropdownMenuTrigger asChild>
+              //       <Button
+              //         variant="ghost"
+              //         className="flex items-center space-x-2 h-10 px-3"
+              //       >
+              //         <UserAvatar />
+              //         <span className="text-sm font-medium">
+              //           {user?.name || "User"}
+              //         </span>
+              //         <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              //       </Button>
+              //     </DropdownMenuTrigger>
+              //     <DropdownMenuContent align="end" className="w-56">
+              //       <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              //       <DropdownMenuSeparator />
+              //       <DropdownMenuItem>
+              //         <User className="mr-2 h-4 w-4" />
+              //         Profile
+              //       </DropdownMenuItem>
+              //       <DropdownMenuItem>
+              //         <Heart className="mr-2 h-4 w-4" />
+              //         Favorites
+              //       </DropdownMenuItem>
+              //       <DropdownMenuItem>
+              //         <Download className="mr-2 h-4 w-4" />
+              //         Downloads
+              //       </DropdownMenuItem>
+              //       <DropdownMenuItem>
+              //         <Settings className="mr-2 h-4 w-4" />
+              //         Settings
+              //       </DropdownMenuItem>
+              //       <DropdownMenuSeparator />
+              //       <DropdownMenuItem
+              //         onClick={logout}
+              //         className="text-destructive focus:text-destructive"
+              //       >
+              //         <LogOut className="mr-2 h-4 w-4" />
+              //         Sign out
+              //       </DropdownMenuItem>
+              //     </DropdownMenuContent>
+              //   </DropdownMenu>
+              // </div>
+              <div className="space-y-2">
+                <Button
+                  onClick={logout}
+                  variant="default"
+                  
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Button variant="ghost" asChild>
                   <Link href="/login">Login</Link>
                 </Button>
-                <Button asChild>
-                  <Link href="/signup">Sign Up</Link>
+                <Button
+                  asChild
+                  className="shadow-md hover:shadow-lg transition-all duration-300"
+                >
+                  <Link href="/signup">Get Started</Link>
                 </Button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile Sheet Menu */}
           <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </Button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center space-x-2">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-primary rounded-xl">
+                      <Sparkles className="h-4 w-4 text-primary-foreground" />
+                    </div>
+                    <span>D-wally</span>
+                  </SheetTitle>
+                </SheetHeader>
+
+                <div className="mt-6 space-y-4">
+                  {/* Mobile Search */}
+                  <form onSubmit={handleSearch} className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        value={query}
+                        placeholder="Search..."
+                        onChange={(e) => setQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full">
+                      Search
+                    </Button>
+                  </form>
+
+                  <Separator />
+
+                  {/* Mobile Auth Section */}
+                  {isLoggedIn ? (
+                    // <div className="space-y-4">
+                    //   <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
+                    //     <UserAvatar className="h-10 w-10" />
+                    //     <div>
+                    //       <p className="text-sm font-medium">{user?.name || 'User'}</p>
+                    //       <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    //     </div>
+                    //   </div>
+
+                    //   <div className="space-y-2">
+                    //     <Button variant="ghost" className="w-full justify-start">
+                    //       <User className="mr-2 h-4 w-4" />
+                    //       Profile
+                    //     </Button>
+                    //     <Button variant="ghost" className="w-full justify-start">
+                    //       <Heart className="mr-2 h-4 w-4" />
+                    //       Favorites
+                    //     </Button>
+                    //     <Button variant="ghost" className="w-full justify-start">
+                    //       <Download className="mr-2 h-4 w-4" />
+                    //       Downloads
+                    //     </Button>
+                    //     <Button variant="ghost" className="w-full justify-start">
+                    //       <Settings className="mr-2 h-4 w-4" />
+                    //       Settings
+                    //     </Button>
+
+                    //     <Separator />
+
+                    //     <Button
+                    //       onClick={logout}
+                    //       variant="ghost"
+                    //       className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                    //     >
+                    //       <LogOut className="mr-2 h-4 w-4" />
+                    //       Sign out
+                    //     </Button>
+                    //   </div>
+                    // </div>
+                    <div className="space-y-2">
+                      <Button
+                        onClick={logout}
+                        variant="ghost"
+                        className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign out
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Button
+                        variant="ghost"
+                        asChild
+                        className="w-full justify-start"
+                      >
+                        <Link href="/login">Login</Link>
+                      </Button>
+                      <Button asChild className="w-full">
+                        <Link href="/signup">Get Started</Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-
-        {/* Mobile Navigation Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200">
-              {/* Mobile Search */}
-              <div className="px-3 py-2">
-                <div className="flex">
-                  <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Search className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-l-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <Button className="rounded-l-none">Search</Button>
-                </div>
-              </div>
-
-              {/* Mobile Auth Buttons */}
-              <div className="pt-4 pb-3 border-t border-gray-200">
-                <div className="flex flex-col space-y-2 px-3">
-                  <Button variant="ghost" className="justify-start" asChild>
-                    <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                      Login
-                    </Link>
-                  </Button>
-
-                  <Button className="justify-start" asChild>
-                    <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
-                      Sign Up
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   );
