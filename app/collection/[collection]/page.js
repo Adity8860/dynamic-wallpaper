@@ -12,7 +12,7 @@ import {
   List,
   ArrowUp,
 } from "lucide-react";
-import { useAuth } from "@/context/authContext";
+import { useAuth } from "@/context/authContext.js";
 
 const PIXABAY_API_KEY = "50781656-478fec576b87761cff94f809e";
 const PIXABAY_BASE_URL = "https://pixabay.com/api/";
