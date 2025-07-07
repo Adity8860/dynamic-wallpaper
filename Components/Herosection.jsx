@@ -1,8 +1,8 @@
 "use client";
 // Components/Herosection.js
 import Image from "next/image";
-import { Button } from "@/Components/ui/button";
-import { Card, CardContent } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button.jsx";
+import { Card, CardContent } from "@/Components/ui/card.jsx";
 import {
   HoverCard,
   HoverCardContent,
@@ -10,7 +10,7 @@ import {
 } from "@/Components/ui/hover-card";
 import { Download, Heart, Eye } from "lucide-react";
 import { downloadImage } from "@/lib/utils";
-import { useAuth } from "@/context/authContext";
+import { useAuth } from "@/context/authContext.js";
 import Link from "next/link";
 
 export default function HeroSection({ images }) {
