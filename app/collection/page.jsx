@@ -8,11 +8,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge.jsx";
-import { Button } from "@/components/ui/button.jsx";
-import { Skeleton } from "@/components/ui/skeleton.jsx";
-import { Alert, AlertDescription } from "@/components/ui/alert.jsx";
+} from "@/Components/ui/card";
+import { Badge } from "@/Components/ui/badge.jsx";
+import { Button } from "@/Components/ui/button.jsx";
+import { Skeleton } from "@/Components/ui/skeleton.jsx";
+import { Alert, AlertDescription } from "@/Components/ui/alert.jsx";
 import {
   Heart,
   ArrowRight,
