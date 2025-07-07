@@ -9,10 +9,10 @@ import {
   X,
   ExternalLink,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card.jsx";
+import { Button } from "@/components/ui/button.jsx";
 import Image from "next/image";
-import { useAuth } from "@/context/authContext";
+import { useAuth } from "@/context/authContext.js";
 
 export default function ImageGrid({ images }) {
   const [loadedImages, setLoadedImages] = useState(new Set());
